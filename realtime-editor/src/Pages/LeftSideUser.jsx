@@ -1,0 +1,121 @@
+import React, { useEffect, useRef, useState } from "react"
+import Client from "../Components/Client"
+import { initSocket } from "../Socket"
+import ACTIONS from "../Action"
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
+import toast from "react-hot-toast"
+const LeftSideUser = () => {
+  const [input, setInput] = useState("")
+  const [client, setClients] = useState([])
+  const param = useParams()
+  const socketRef = useRef(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const init = async () => {
+      socketRef.current = await initSocket()
+      socketRef.current.on("connect_error", (err) => handleError(err))
+      socketRef.current.on("connect_failed", (err) => handleError(err))
+
+      function handleError(e) {
+        console.log("socket error", e)
+        toast.error("socket Connection failed, try again later")
+        navigate("/")
+      }
+      socketRef.current.emit(ACTIONS.JOIN, {
+        roomId: param?.roomId,
+        userName: location.state?.userName,
+      })
+
+      socketRef.current.on(
+        ACTIONS.JOINED,
+        ({ clients, userName, socketId }) => {
+          if (userName !== location.state.userName) {
+            toast.success(`${userName} joined the room`)
+          }
+          console.log(`${userName} joined the room`)
+          setClients(clients)
+        }
+      )
+
+      socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, userName }) => {
+        toast.success(`${userName} leave the room`)
+        setClients((pre) => {
+          return pre.filter((client) => client.socketId !== socketId)
+        })
+      })
+    }
+    init()
+    return () => {
+     if (socketRef.current) {
+       socketRef.current.disconnect()
+       socketRef.current.off(ACTIONS.JOINED)
+       socketRef.current.off(ACTIONS.DISCONNECTED)
+     }
+    }
+  }, [location.state?.roomId, location.state?.userName, navigate])
+
+  const handleDisconnect = () => {
+    socketRef.current.emit(ACTIONS.DISCONNECTED, {
+      roomID: param?.roomId,
+      userName: location.state?.userName,
+    })
+    toast.success(`${location.state?.userName} leave the room`)
+  }
+
+  if (!location.state) {
+    ;<Navigate to="/" />
+  }
+  // console.log(input)
+
+  return (
+    <div className="min-w-[300px] px-2 pt-3  flex flex-col text-white bg-slate-700 h-screen ">
+      <div className="header">
+        <div className=" flex gap-2">
+          <figure>
+            <img
+              src="https://a.storyblok.com/f/99519/1100x619/88ffae4af1/real-time-collaboration-blog.png/m/1080x608/filters:format(webp):quality(90)"
+              alt=""
+              className="w-16 h-16"
+            />
+          </figure>
+          <div className="border bo h-16 w-0 border-white"></div>
+          <div className="name flex  items-center">
+            <h1 className="text-red-500 text-xl">
+              Realtime <span className="text-white "> Collaboration</span>
+            </h1>
+          </div>
+        </div>
+        <div className="border bo h-0 mt-4 w-full border-gray-400"></div>
+      </div>
+      <div className="">
+        <h1 className="text-white text-xl  text-center ">Connected</h1>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className=" w-full p-1 rounded-md mb-3 text-black"
+          placeholder="Search connected user"
+        />
+      </div>
+
+      <div className="flex-1 overflow-auto">
+        {client?.map((curr) => {
+          return <Client key={curr.socketId} userName={curr.userName} />
+        })}
+      </div>
+      <div className=" flex flex-col mt-3">
+        <button className="bg-blue-400 font-semibold hover:bg-blue-700 px-2 my-1 border-1 rounded-md">
+          Copy ROOM ID
+        </button>
+        <button
+          onClick={handleDisconnect}
+          className="bg-red-500 font-semibold hover:bg-red-700 px-2 my-1 border-1 rounded-md">
+          Leave
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default LeftSideUser
