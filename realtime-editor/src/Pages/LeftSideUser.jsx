@@ -4,69 +4,46 @@ import { initSocket } from "../Socket"
 import ACTIONS from "../Action"
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import toast from "react-hot-toast"
-const LeftSideUser = () => {
+
+
+const LeftSideUser = ({client,roomId}) => {
+  const [filteredClients, setFilteredClients] = useState([])
   const [input, setInput] = useState("")
-  const [client, setClients] = useState([])
-  const param = useParams()
-  const socketRef = useRef(null)
-  const location = useLocation()
-  const navigate = useNavigate()
-  useEffect(() => {
-    const init = async () => {
-      socketRef.current = await initSocket()
-      socketRef.current.on("connect_error", (err) => handleError(err))
-      socketRef.current.on("connect_failed", (err) => handleError(err))
-
-      function handleError(e) {
-        console.log("socket error", e)
-        toast.error("socket Connection failed, try again later")
-        navigate("/")
-      }
-      socketRef.current.emit(ACTIONS.JOIN, {
-        roomId: param?.roomId,
-        userName: location.state?.userName,
-      })
-
-      socketRef.current.on(
-        ACTIONS.JOINED,
-        ({ clients, userName, socketId }) => {
-          if (userName !== location.state.userName) {
-            toast.success(`${userName} joined the room`)
-          }
-          console.log(`${userName} joined the room`)
-          setClients(clients)
-        }
-      )
-
-      socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, userName }) => {
-        toast.success(`${userName} leave the room`)
-        setClients((pre) => {
-          return pre.filter((client) => client.socketId !== socketId)
-        })
-      })
-    }
-    init()
-    return () => {
-     if (socketRef.current) {
-       socketRef.current.disconnect()
-       socketRef.current.off(ACTIONS.JOINED)
-       socketRef.current.off(ACTIONS.DISCONNECTED)
-     }
-    }
-  }, [location.state?.roomId, location.state?.userName, navigate])
-
-  const handleDisconnect = () => {
-    socketRef.current.emit(ACTIONS.DISCONNECTED, {
-      roomID: param?.roomId,
-      userName: location.state?.userName,
-    })
-    toast.success(`${location.state?.userName} leave the room`)
-  }
-
+   const location = useLocation()
+   const navigate = useNavigate()
   if (!location.state) {
-    ;<Navigate to="/" />
+    <Navigate to="/" />
   }
+
+
+ useEffect(() => {
+   const Searchclient = client?.filter((clientItem) => {
+     return (
+       clientItem.userName &&
+       clientItem.userName.toLowerCase().includes(input.toLowerCase())
+     )
+   })
+  //  console.log(Searchclient)
+
+   setFilteredClients(Searchclient || []) // Update the state with the filtered clients
+ }, [input, client])
+
   // console.log(input)
+
+  const roomIdCopy = async() =>{
+    try {
+      await navigator.clipboard.writeText(roomId);
+      toast.success("roomId copy")
+      
+    } catch (error) {
+      toast.success("does not copy roomId ")
+      
+    }
+
+  }
+  const handleDisconnect = () =>{
+    navigate("/")
+  }
 
   return (
     <div className="min-w-[300px] px-2 pt-3  flex flex-col text-white bg-slate-700 h-screen ">
@@ -100,12 +77,12 @@ const LeftSideUser = () => {
       </div>
 
       <div className="flex-1 overflow-auto">
-        {client?.map((curr) => {
+        {filteredClients?.map((curr) => {
           return <Client key={curr.socketId} userName={curr.userName} />
         })}
       </div>
       <div className=" flex flex-col mt-3">
-        <button className="bg-blue-400 font-semibold hover:bg-blue-700 px-2 my-1 border-1 rounded-md">
+        <button onClick={roomIdCopy} className="bg-blue-400 font-semibold hover:bg-blue-700 px-2 my-1 border-1 rounded-md">
           Copy ROOM ID
         </button>
         <button
