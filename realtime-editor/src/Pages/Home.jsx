@@ -25,7 +25,7 @@ const Home = () => {
   }
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(input)
+    // console.log(input)
    
    
     navigate(`/editor/${input.id}`,{

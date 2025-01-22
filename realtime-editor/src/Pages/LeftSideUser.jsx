@@ -4,12 +4,16 @@ import { initSocket } from "../Socket"
 import ACTIONS from "../Action"
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import toast from "react-hot-toast"
+import { useDispatch } from "react-redux"
+import { setCode, setSelect } from "../redux/Slice"
 
 
 const LeftSideUser = ({client,roomId}) => {
   const [filteredClients, setFilteredClients] = useState([])
   const [input, setInput] = useState("")
    const location = useLocation()
+  const dispatch = useDispatch()
+
    const navigate = useNavigate()
   if (!location.state) {
     <Navigate to="/" />
@@ -43,10 +47,14 @@ const LeftSideUser = ({client,roomId}) => {
   }
   const handleDisconnect = () =>{
     navigate("/")
+    dispatch(setCode(""))
+    dispatch(setSelect(false))
+
+
   }
 
   return (
-    <div className="min-w-[300px] px-2 pt-3  flex flex-col text-white bg-slate-700 h-screen ">
+    <div className="min-w-[300px] px-2 pt-3 sm:h-screen flex flex-col text-white bg-slate-700 h-[100%] ">
       <div className="header">
         <div className=" flex gap-2">
           <figure>

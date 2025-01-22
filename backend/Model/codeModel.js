@@ -12,4 +12,4 @@ const codeSchema =  mongoose.Schema ({
 
 })
 
- export const codeModel = mongoose.Model("code",codeSchema)
+ export const codeModel = mongoose.model("code",codeSchema)

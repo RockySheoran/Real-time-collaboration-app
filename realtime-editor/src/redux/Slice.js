@@ -8,7 +8,9 @@ const allSlice  = createSlice({
     initialState:{
         allUser:[],
         socket:null,
-        code:""
+        Allcode:"",
+        select:false,
+        roomID :"",
     },
     reducers:{
         setAllUser :(state,action) =>{
@@ -18,12 +20,19 @@ const allSlice  = createSlice({
             state.socket = action.payload;
         },
         setCode :(state,action) =>{
-            state.code = action.payload;
+            state.Allcode = action.payload;
+        },
+        
+        setSelect :(state,action) =>{
+            state.select = action.payload;
+        },
+        setRoomId: (state, action) => {
+            state.roomID = action.payload;
         },
     }
 })
 
 
-export  const { setAllUser,setSocket} = allSlice.actions;
+export const { setAllUser, setSocket, setCode,setSelect,setRoomId } = allSlice.actions;
 
 export default allSlice.reducer;

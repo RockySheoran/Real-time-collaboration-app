@@ -4,11 +4,14 @@ import { EditorState } from "@codemirror/state"
 import { html } from "@codemirror/lang-html"
 import { oneDark } from "@codemirror/theme-one-dark"
 import { closeBrackets } from "@codemirror/autocomplete"
-import ACTIONS from "../Action"
+import { useDispatch, useSelector } from "react-redux"
+import { setCode } from "../redux/Slice"
 
-const RightSideEditor = ({ roomId, socketRef, code,onCodeChange }) => {
+const RightSideEditor = ({ roomId, socketRef, code, onCodeChange }) => {
+  const { Allcode } = useSelector((store) => store.all) // Redux state
   const [editorContent, setEditorContent] = useState(
-    `<!DOCTYPE html>
+    Allcode ||
+      `<!DOCTYPE html>
 <html>
   <head>
     <title>Rendered Output</title>
@@ -38,6 +41,7 @@ const RightSideEditor = ({ roomId, socketRef, code,onCodeChange }) => {
   )
   const [editorView, setEditorView] = useState(null)
   const editorRef = useRef(null)
+  const dispatch = useDispatch()
 
   // Debounce function to limit the frequency of state updates
   const debounce = (func, delay) => {
@@ -63,8 +67,9 @@ const RightSideEditor = ({ roomId, socketRef, code,onCodeChange }) => {
             if (update.docChanged) {
               const newContent = update.state.doc.toString()
               setEditorContent(newContent) // Sync content state
-               debouncedEmit(newContent)
-               onCodeChange(newContent);
+              debouncedEmit(newContent)
+              onCodeChange(newContent)
+              dispatch(setCode(newContent)) // Save to Redux state
             }
           }),
         ],
@@ -94,20 +99,15 @@ const RightSideEditor = ({ roomId, socketRef, code,onCodeChange }) => {
         },
         selection: currentSelection, // Preserve the cursor position
       })
-      setEditorContent(code)
-
-      // Dispatch the transaction to update content
       editorView.dispatch(transaction)
     }
-  }, [code])
+  }, [code, editorView])
 
   const debouncedEmit = useRef(
     debounce((newContent) => {
       socketRef.current.emit("code_change", { roomId, code: newContent })
-      // console.log(roomId, newContent)
     }, 300)
   ).current
-
 
   useEffect(() => {
     const iframe = document.getElementById("output-iframe")
@@ -120,16 +120,16 @@ const RightSideEditor = ({ roomId, socketRef, code,onCodeChange }) => {
   }, [editorContent])
 
   return (
-    <div className="grid grid-cols-2 h-screen gap-3 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 sm:h-screen h-[200%] gap-3 w-full">
       {/* CodeMirror Editor */}
       <div
         id="editor-container"
-        className="h-full overflow-auto bg-gray-800 border-red-500 border-2"></div>
+        className="sm:h--full h-[100%] overflow-auto bg-gray-800 border-red-500 border-2"></div>
 
       {/* Output iframe */}
       <iframe
         id="output-iframe"
-        className="w-full overflow-auto h-full border-2"
+        className="w-full overflow-auto h-[200%] sm:h-full border-2"
         title="Rendered Output"></iframe>
     </div>
   )

@@ -18,6 +18,7 @@ code {
 }
 ::-webkit-scrollbar {
   width: 5px;
+  height: 5px;
 }
 
 /* Track */
@@ -43,4 +44,8 @@ code {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #b30000; 
+}
+
+.app{
+  height: 91Vh !important;
 }

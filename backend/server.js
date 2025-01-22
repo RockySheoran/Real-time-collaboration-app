@@ -4,7 +4,9 @@ import { Server } from "socket.io";
 const app = express();
 import dotenv from "dotenv"
 import { db } from "./db.js";
-
+import { CodeRouter } from "./Router/CodeRouter.js";
+import cors from 'cors'; // Optional, if using CORS
+import bodyParser from 'body-parser';
 dotenv.config();
 
 const server = http.createServer(app);
@@ -13,7 +15,10 @@ const io = new Server(server);
 
 const userSocketMap = {};
 const roomCodeMap = {}; // A map to store the code for each room
+app.use(express.json());
 
+// Optional middleware
+app.use(bodyParser.urlencoded({ extended: true }));
 const getAllConnectedClients = (roomId) => {
     return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map((socketId) => {
         return {
@@ -47,7 +52,7 @@ io.on("connection", (socket) => {
             });
         });
     });
-
+    
     // When code is changed by any user in the room
     socket.on("code_change", ({ roomId, code }) => {
         roomCodeMap[roomId] = code;
@@ -78,6 +83,12 @@ io.on("connection", (socket) => {
         socket.leave();
     });
 });
+app.use(cors({
+    origin: "http://localhost:3000", // Replace with the URL of your frontend
+    credentials: true, // Allow credentials such as cookies
+}));
+
+app.use("/api/code",CodeRouter);
 
 server.listen(port, () => {
     db();
