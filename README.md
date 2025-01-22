@@ -51,29 +51,6 @@ Are you tired of sending code snippets back and forth, struggling to debug and c
 - React-hot-Toastify
 
 ## Installation
-
-### Running via Docker Image (highly recommended)
-
-To run the docker image, follow the steps below:
-
-1. Install [Docker](https://www.docker.com/) on your machine.
-2. Pull the docker image from the docker hub by running `docker pull mohitur/code-editor`
-3. Run the docker image by running `docker run -p 8000:8000 -p 3000:3000 -p 5000:5000 mohitur/code-editor`
-4. Go to `http://localhost:3000` to view the app
-5. Create a room by clicking on the `create new room` button and put a username of your choice
-   5 . Copy the room id by clicking on the `Copy ROOM ID` button
-6. To join as an another user open another browser/browser-window or an incognito tab and go to `http://localhost:3000`
-7. Enter the same room id to join the same room
-
-Now both your editor will be synced and you can see the changes in real time. Try opening the same room in multiple browsers/browsers-windows and see the changes.
-
-**Note:** If you are using docker in wsl2/linux then add `sudo` before the docker commands.
-
-### Running via building your own Docker Image
-
-To run the app using docker, follow the steps below:
-
-
 ### Clone the Repository
 ```sh
 git clone https://github.com/RockySheoran/Real-time-collaboration-app.git
