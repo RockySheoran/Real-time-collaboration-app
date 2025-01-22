@@ -120,16 +120,16 @@ const RightSideEditor = ({ roomId, socketRef, code, onCodeChange }) => {
   }, [editorContent])
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 sm:h-screen h-[200%] gap-3 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 sm:h-[150vh] overflow-auto md:h-screen h-[200%] gap-3 w-full">
       {/* CodeMirror Editor */}
       <div
         id="editor-container"
-        className="sm:h--full h-[100%] overflow-auto bg-gray-800 border-red-500 border-2"></div>
+        className="md:h-full h-[100%] overflow-auto bg-gray-800 border-red-500 border-2"></div>
 
       {/* Output iframe */}
       <iframe
         id="output-iframe"
-        className="w-full overflow-auto h-[200%] sm:h-full border-2"
+        className="w-full overflow-auto h-[200%] md:h-full border-2"
         title="Rendered Output"></iframe>
     </div>
   )
